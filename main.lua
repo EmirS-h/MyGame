@@ -11,29 +11,26 @@ function love.load()
 
     Shove.createLayer("baseLayer")
 
-    InputManager.bindAction('close_game', { 'escape' })
-
     SceneManager.addScene('MainMenu', require('myGame.MenuScene'))
     SceneManager.addScene('GameScene', require('myGame.GameScene'))
 
     SceneManager.changeScene('MainMenu')
+
+    InputManager.bind("fullscreen", { "escape", "space" })
 end
 
 function love.update(dt)
+    InputManager.update()
+
     Globals.MouseX, Globals.MouseY = love.mouse.getPosition()
     _, Globals.MouseWorldX, Globals.MouseWorldY = Shove.mouseToViewport()
 
-
-    if InputManager.isActionPressed('close_game') then
-        love.event.quit()
-    end
-
-    if InputManager.isKeyPressed("e") then
-        print("eeeeeeeeeeeeeeeee")
-    end
-
     SceneManager.update(dt)
-    InputManager.update()
+
+    if InputManager.isActionJustPressed("fullscreen") then
+        Fullscreen = not Fullscreen
+        love.window.setFullscreen(Fullscreen)
+    end
 end
 
 function love.draw()
@@ -53,17 +50,21 @@ function love.draw()
 end
 
 function love.keypressed(key)
-    InputManager.handleKeypressed(key)
+    InputManager.handlePressed(key)
 end
 
 function love.keyreleased(key)
-    InputManager.handleKeyreleased(key)
+    InputManager.handleReleased(key)
 end
 
-function love.mousepressed(x, y, button, istouch)
-    InputManager.handleMousepressed(x, y, button, istouch)
+function love.mousepressed(x, y, button)
+    InputManager.handlePressed(button)
 end
 
-function love.mousereleased(x, y, button, istouch)
-    InputManager.handleMousereleased(x, y, button, istouch)
+function love.mousereleased(x, y, button)
+    InputManager.handleReleased(button)
+end
+
+function love.mousemoved(x, y, dx, dy)
+    InputManager.handleMouseMoved(x, y, dx, dy)
 end

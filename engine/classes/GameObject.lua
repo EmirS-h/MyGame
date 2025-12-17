@@ -8,8 +8,6 @@ function GameObject:new()
 
     obj.name = "GameObject"
 
-    obj.transform = Transform:new()
-
     obj.active = true
     obj.visible = true
     obj.components = {}

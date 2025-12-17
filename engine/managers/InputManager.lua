@@ -1,190 +1,103 @@
 local InputManager = {
-    keyboardStates = {},
-    mouseStates = {},
-    previousKeyboardStates = {},
-    previousMouseStates = {},
-    mouseTouchStates = {},
-    mousePosition = { x = 0, y = 0 },
-    mouseDelta = { x = 0, y = 0 },
-    bindings = {},
-    consumedActions = {}
-}
+    _justPressed = {},
+    _justReleased = {},
 
-local KEY_STATES = {
-    NONE = 0,
-    PRESSED = 1,
-    HELD = 2,
-    RELEASED = 3
+    _pendingPressed = {},
+    _pendingReleased = {},
+
+    _mousePosition = { x = 0, y = 0 },
+    _mouseDelta = { x = 0, y = 0 },
+
+    bindings = {},
+    consumed = {},
 }
 
 function InputManager.update()
-    InputManager.consumedActions = {}
+    for k in pairs(InputManager._justPressed) do InputManager._justPressed[k] = nil end
+    for k in pairs(InputManager._justReleased) do InputManager._justReleased[k] = nil end
+    for k in pairs(InputManager.consumed) do InputManager.consumed[k] = nil end
 
-    InputManager.previousKeyboardStates = {}
-    for k, v in pairs(InputManager.keyboardStates) do
-        InputManager.previousKeyboardStates[k] = v
+    for k, v in pairs(InputManager._pendingPressed) do
+        InputManager._justPressed[k] = true
+        InputManager._pendingPressed[k] = nil
     end
 
-    InputManager.previousMouseStates = {}
-    for k, v in pairs(InputManager.mouseStates) do
-        InputManager.previousMouseStates[k] = v
+    for k, v in pairs(InputManager._pendingReleased) do
+        InputManager._justReleased[k] = true
+        InputManager._pendingReleased[k] = nil
     end
 
-    for key, state in pairs(InputManager.keyboardStates) do
-        if state == KEY_STATES.PRESSED then
-            InputManager.keyboardStates[key] = KEY_STATES.HELD
-        elseif state == KEY_STATES.RELEASED then
-            InputManager.keyboardStates[key] = KEY_STATES.NONE
-        end
-    end
 
-    for button, state in pairs(InputManager.mouseStates) do
-        if state == KEY_STATES.PRESSED then
-            InputManager.mouseStates[button] = KEY_STATES.HELD
-        elseif state == KEY_STATES.RELEASED then
-            InputManager.mouseStates[button] = KEY_STATES.NONE
-            InputManager.mouseTouchStates[button] = nil
-        end
+    InputManager._mouseDelta.x = 0
+    InputManager._mouseDelta.y = 0
+end
+
+function InputManager.wasJustPressed(key)
+    return InputManager._justPressed[key] == true
+end
+
+function InputManager.wasJustReleased(key)
+    return InputManager._justReleased[key] == true
+end
+
+-- Check if a key/button is physically held down (Native Love2D check)
+function InputManager.isDown(key)
+    if type(key) == "number" then
+        return love.mouse.isDown(key)
+    else
+        return love.keyboard.isDown(key)
     end
 end
 
-function InputManager.bindAction(actionName, keys)
+function InputManager.bind(actionName, keys)
     InputManager.bindings[actionName] = keys
 end
 
-function InputManager.consumeAction(actionName)
-    InputManager.consumedActions[actionName] = true
+function InputManager.consume(actionName)
+    InputManager.consumed[actionName] = true
 end
 
-function InputManager.isActionPressed(actionName)
-    if InputManager.consumedActions[actionName] then
-        return false
-    end
+function InputManager.isActionJustPressed(action)
+    if InputManager.consumed[action] then return false end
 
-    local keys = InputManager.bindings[actionName]
+    local keys = InputManager.bindings[action]
     if not keys then return false end
 
     for _, key in ipairs(keys) do
-        -- We must check if the key is a number (mouse) or string (keyboard)
-        if type(key) == "number" then
-            if InputManager.isMousePressed(key) then
-                return true
-            end
-        elseif type(key) == "string" then
-            if InputManager.isKeyPressed(key) then
-                return true
-            end
-        end
+        if InputManager.wasJustPressed(key) then return true end
     end
     return false
 end
 
-function InputManager.isActionHeld(actionName)
-    if InputManager.consumedActions[actionName] then
-        return false
-    end
+function InputManager.isActionDown(action)
+    if InputManager.consumed[action] then return false end
 
-    local keys = InputManager.bindings[actionName]
+    local keys = InputManager.bindings[action]
     if not keys then return false end
 
     for _, key in ipairs(keys) do
-        if type(key) == "number" then
-            if InputManager.isMouseHeld(key) then
-                return true
-            end
-        elseif type(key) == "string" then
-            if InputManager.isKeyHeld(key) then
-                return true
-            end
-        end
+        if InputManager.isDown(key) then return true end
     end
     return false
 end
 
-function InputManager.isActionReleased(actionName)
-    if InputManager.consumedActions[actionName] then
-        return false
-    end
-
-    local keys = InputManager.bindings[actionName]
-    if not keys then return false end
-
-    for _, key in ipairs(keys) do
-        if type(key) == "number" then
-            if InputManager.isMouseReleased(key) then
-                return true
-            end
-        elseif type(key) == "string" then
-            if InputManager.isKeyReleased(key) then
-                return true
-            end
-        end
-    end
-    return false
+function InputManager.handlePressed(key)
+    InputManager._pendingPressed[key] = true
 end
 
-function InputManager.isKeyPressed(key)
-    return InputManager.keyboardStates[key] == KEY_STATES.PRESSED
+function InputManager.handleReleased(key)
+    InputManager._pendingReleased[key] = true
 end
 
-function InputManager.isKeyHeld(key)
-    return InputManager.keyboardStates[key] == KEY_STATES.HELD
-end
-
-function InputManager.isKeyReleased(key)
-    return InputManager.keyboardStates[key] == KEY_STATES.RELEASED
-end
-
-function InputManager.isMousePressed(button)
-    return InputManager.mouseStates[button] == KEY_STATES.PRESSED
-end
-
-function InputManager.isMouseHeld(button)
-    return InputManager.mouseStates[button] == KEY_STATES.HELD
-end
-
-function InputManager.isMouseReleased(button)
-    return InputManager.mouseStates[button] == KEY_STATES.RELEASED
-end
-
-function InputManager.isMousePressedByTouch(button)
-    return InputManager.isMousePressed(button) and InputManager.mouseTouchStates[button] == true
-end
-
-function InputManager.isMouseHeldByTouch(button)
-    return InputManager.isMouseHeld(button) and InputManager.mouseTouchStates[button] == true
+function InputManager.handleMouseMoved(x, y, dx, dy)
+    InputManager._mousePosition.x = x
+    InputManager._mousePosition.y = y
+    InputManager._mouseDelta.x = dx
+    InputManager._mouseDelta.y = dy
 end
 
 function InputManager.getMousePosition()
-    return InputManager.mousePosition.x, InputManager.mousePosition.y
-end
-
-function InputManager.getMouseDelta()
-    return InputManager.mouseDelta.x, InputManager.mouseDelta.y
-end
-
-function InputManager.handleKeypressed(key)
-    InputManager.keyboardStates[key] = KEY_STATES.PRESSED
-end
-
-function InputManager.handleKeyreleased(key)
-    InputManager.keyboardStates[key] = KEY_STATES.RELEASED
-end
-
-function InputManager.handleMousepressed(x, y, button, istouch)
-    InputManager.mouseStates[button] = KEY_STATES.PRESSED
-    InputManager.mouseTouchStates[button] = istouch or false
-end
-
-function InputManager.handleMousereleased(x, y, button, istouch)
-    InputManager.mouseStates[button] = KEY_STATES.RELEASED
-end
-
-function InputManager.handleMousemoved(x, y, dx, dy)
-    InputManager.mousePosition.x = x
-    InputManager.mousePosition.y = y
-    InputManager.mouseDelta.x = dx
-    InputManager.mouseDelta.y = dy
+    return InputManager._mousePosition.x, InputManager._mousePosition.y
 end
 
 return InputManager
