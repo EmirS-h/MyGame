@@ -6,6 +6,7 @@ Globals = require("engine.managers.Globals")
 Fullscreen = false
 
 function love.load()
+love
     Shove.setResolution(640, 360, { fitMethod = "pixel", scalingFilter = "nearest", renderMode = "layer" })
     Shove.setWindowMode(1280, 720, { resizable = true })
 
