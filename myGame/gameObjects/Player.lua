@@ -12,9 +12,6 @@ function Player:new()
     go:addComponent(Transform:new(150, 300))
 
     go:addComponent(Shape:new("rectangle", 50, 50, { 0.6, 0.3, 1 }))
-
-    go:addComponent(ScreenBounce:new(400, 400))
-
     return go
 end
 

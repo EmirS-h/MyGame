@@ -28,7 +28,6 @@ function MainMenuScene:unload()
     Scene.unload(self)
 end
 
--- 5. Override the 'draw' function to add a background (optional)
 function MainMenuScene:draw()
     love.graphics.clear(0.1, 0.1, 0.1)
     Scene.draw(self)
