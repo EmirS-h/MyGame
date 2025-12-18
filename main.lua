@@ -7,13 +7,17 @@ Fullscreen = false
 
 function love.load()
     local current_os = love.system.getOS()
-    local resW,res
+    local resW,resH = 1280,720
+    local vW,vH = 640,360
     if current_os == "iOS" then
-        print("Iphone mg")
+        resW = 720
+        resH = 1280
+        vW = 360
+        vH = 640
     end
 
-    Shove.setResolution(640, 360, { fitMethod = "pixel", scalingFilter = "nearest", renderMode = "layer" })
-    Shove.setWindowMode(1280, 720, { resizable = true })
+    Shove.setResolution(vW,vH, { fitMethod = "pixel", scalingFilter = "nearest", renderMode = "layer" })
+    Shove.setWindowMode(resW, resH, { resizable = false })
 
     Shove.createLayer("baseLayer")
 
