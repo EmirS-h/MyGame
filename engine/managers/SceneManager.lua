@@ -42,28 +42,4 @@ function SceneManager.draw()
     end
 end
 
--- function SceneManager.onKeyPressed(key)
---     if SceneManager.currentScene and SceneManager.currentScene.onKeyPressed then
---         SceneManager.currentScene:onKeyPressed(key)
---     end
--- end
-
--- function SceneManager.onKeyReleased(key)
---     if SceneManager.currentScene and SceneManager.currentScene.onKeyReleased then
---         SceneManager.currentScene:onKeyReleased(key)
---     end
--- end
-
--- function SceneManager.onMousePressed(x, y, button, istouch)
---     if SceneManager.currentScene and SceneManager.currentScene.onMousePressed then
---         SceneManager.currentScene:onMousePressed(x, y, button, istouch)
---     end
--- end
-
--- function SceneManager.onMouseReleased(x, y, button, istouch)
---     if SceneManager.currentScene and SceneManager.currentScene.onMouseReleased then
---         SceneManager.currentScene:onMouseReleased(x, y, button, istouch)
---     end
--- end
-
 return SceneManager
