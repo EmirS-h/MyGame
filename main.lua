@@ -6,7 +6,12 @@ Globals = require("engine.managers.Globals")
 Fullscreen = false
 
 function love.load()
-love
+    local current_os = love.system.getOS()
+    local resW,res
+    if current_os == "iOS" then
+        print("Iphone mg")
+    end
+
     Shove.setResolution(640, 360, { fitMethod = "pixel", scalingFilter = "nearest", renderMode = "layer" })
     Shove.setWindowMode(1280, 720, { resizable = true })
 
