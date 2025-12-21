@@ -8,7 +8,7 @@ Fullscreen = false
 function love.load()
     local current_os = love.system.getOS()
     if current_os == "iOS" or current_os == "Android" then
-    resW, resH = love.graphics.getDimensions()
+    resW, resH = 720,1280
     print(resW,resH)
     vW, vH = 360, 640 -- portrait virtual resolution
 else
